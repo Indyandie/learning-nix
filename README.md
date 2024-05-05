@@ -228,6 +228,225 @@ string
 
 ## Functions
 
+A function takes one argument. The argument and function body are separated by a colon (`:`).
 
+> [!note] Function arguments are the third way (Attributes-set, `let` expressions) to assign names to values. _Names are not known in advance but are placeholders that are filled when calling a function_
 
+### Function Declarations
 
+#### Single argument
+
+```nix
+x: x + 1
+```
+
+#### Multi nested arguments
+
+```nix
+x: y: x + y
+```
+
+#### Attribute Set arguments
+
+```nix
+{ a, b }: a + b
+```
+
+With a default value
+
+```nix
+{ a, b ? 4 }: a + b
+```
+
+With additional values
+
+```nix
+{ a, b, ... }: a + b + c
+```
+
+Name attributes set arguments
+
+```nix
+args@{ a, b, ... }: a + b + args.c
+```
+
+```nix
+{ a, b, ... }@args: a + b + args.c
+```
+
+### Lambdas
+
+Functions are anonymous and have no name, they are referred to as `<LAMBDA>`.
+
+```nix
+x: x + 1
+# <LAMBDA>
+```
+
+Functions can be assigned to a name.
+
+```nix
+let 
+ f = x: x + 1;
+in f
+```
+
+### Calling Functions
+
+Function applications, writing the argument after the function.
+
+```nix
+let 
+ f = x: x + 1;
+in 
+ f 20
+```
+
+Passing a literal value
+
+```nix
+let
+  f = x: x.a;
+in 
+ f { a = 12 }
+```
+
+Pass argument by name
+
+```nix
+let
+ f = x: x.a;
+ v = { a = 12 };
+in
+ f v
+```
+
+Parentheses (`( )`) can be used for a literal functions
+
+```nix
+(x: x + 1) 1
+```
+
+Beware of functions in lists since they are separated by whitespace.
+
+```nix
+# Applies f to a and adds it to the list
+let
+ f = x: x + 1;
+ a = 1;
+in [ (f a) ]
+# [ 2 ]
+```
+
+```nix
+# Put f and a as separate items in the list
+let
+ f = x: x + 1;
+ a = 1;
+in [ f a ]
+# [ <LAMBDA> 1 ]
+```
+
+### Multiple Arguments
+
+Curried functions aka nesting functions
+
+```nix
+x: y: x + y
+# equal to 
+# x: (y: x + y)
+```
+
+This returns the function with the value of `x` set to the pass argument.
+
+```nix
+let
+  f = x: y: x + y;
+in
+f 1
+```
+
+Passing all the arguments will return the value of the evaluated function.
+
+```nix
+let
+  f = x: y: x + y;
+in
+f 1 2
+```
+
+### Attribute Set Argument
+
+AKA _"keyword arguments"_ or _destructuring_. The exact arguments must be passed.
+
+```nix
+{a, b}: a + b
+```
+
+Good idea!
+
+```nix
+let
+  f = {a, b}: a + b;
+in
+f { a = 1; b = 2; }
+```
+
+Bad idea.
+
+```nix
+let
+  f = {a, b}: a + b;
+in
+f { a = 1; b = 2; c = 3; }
+# error: 'f' at (string):2:7 called with unexpected argument 'c'
+# 
+#        at «string»:4:1:
+# 
+#             3| in
+#             4| f { a = 1; b = 2; c = 3; }
+#              | ^
+#             5|
+```
+
+### Default Values
+
+Default arguments. Denoted by separating the attribute name and default value witha question mark (`?`). These are not required arguments.
+
+```nix
+let
+  f = {a, b ? 0}: a + b;
+in
+f { a = 1; }
+```
+
+Empty argument
+
+```nix
+let
+  f = {a ? 0, b ? 0}: a + b;
+in
+f { } # empty attribute set
+```
+
+### Additional Values
+
+Additional arguments are allow with an ellipsis (`...`).
+
+```nix
+let
+  f = {a, b, ...}: a + b;
+in
+f { a = 1; b = 2; c = 3; }
+```
+
+### Named attribute set argument
+
+Also known as “@ pattern”, “@ syntax”, or “‘at’ syntax”.
+
+```nix
+let
+  f = {a, b, ...}@args: a + b + args.c;
+in
+f { a = 1; b = 2; c = 3; }
+```
