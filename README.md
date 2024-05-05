@@ -450,3 +450,61 @@ let
 in
 f { a = 1; b = 2; c = 3; }
 ```
+
+## Function Libraries
+
+Libraries considered standard to the Nix language.
+
+### [`builtins`](https://nix.dev/manual/nix/2.18/language/builtins)
+
+AKA _"primitive operations"_, _"primops"_ 
+
+Functions built into the language, implemented in `C++` available under `builtins`.
+
+```nix
+builtins.toString
+# <PRIMOP>
+```
+
+### `import`
+
+Takes a path to a Nix file, evaluates it and returns the value. If the path points to a directory the `defaults.nix` in the directory is used. 
+
+```nix
+# file.nix
+1 + 2
+```
+
+```nix
+import ./file.nix
+# 3
+```
+
+#### Function Import
+
+```nix
+# ./file/defaults.nix
+x; x + 1
+```
+
+```nix
+import ./file 2
+# 3
+```
+
+### `pkgs.lib`
+
+The `nixpkgs` repo contains `lib`, which provides useful functions. The [functions](https://nixos.org/manual/nixpkgs/stable/#sec-functions-library) are implemented in the Nix language versus `builtins`, that are part of the language
+
+```nix
+let
+  pkgs = import  <nixpkgs> {};
+in
+pkgx.lib.strings.toUpper "scream"
+# "SCREAM"
+```
+
+> [!note]
+> Some functions in `pkgs.lib` are identical to `builtins`.
+
+
