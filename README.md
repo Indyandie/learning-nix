@@ -2,11 +2,15 @@
 
 ## Language Basics
 
-> [!note] Lazy Evaluation
+> [!NOTE]
+>
+> #### Lazy Evaluation
 >
 > Nix uses lazy evaluation by default values are only computed when needed.
 
-> [!note] Whitespace is insignificant.
+> [!NOTE]
+>
+> Whitespace is insignificant.
 
 ## Name & Values
 
@@ -63,7 +67,9 @@ in
 x + y + z
 ```
 
-> [!warning] No, no! Only expressions within the `let` expression itself can access its variable names.
+> [!WARNING]
+>
+> No, no! Only expressions within the `let` expression itself can access its variable names.
 
 ```nix
 {
@@ -177,16 +183,16 @@ in
 "hello ${name}"
 ```
 
-> [!warning]
+> [!WARNING]
 >
 > Only character strings or values that can be represented as character string are allowed.
->
-> ```nix
-> let
->   x = 1;
-> in
-> "${x} + ${x} = ${x + x}" # integers are not allowed
-> ```
+
+```nix
+let
+  x = 1;
+in
+"${x} + ${x} = ${x + x}" # integers are not allowed
+```
 
 ## File System Paths
 
@@ -230,7 +236,9 @@ string
 
 A function takes one argument. The argument and function body are separated by a colon (`:`).
 
-> [!note] Function arguments are the third way (Attributes-set, `let` expressions) to assign names to values. _Names are not known in advance but are placeholders that are filled when calling a function_
+> [!NOTE]
+>
+> Function arguments are the third way (Attributes-set, `let` expressions) to assign names to values. _Names are not known in advance but are placeholders that are filled when calling a function_
 
 ### Function Declarations
 
@@ -504,7 +512,9 @@ pkgx.lib.strings.toUpper "scream"
 # "SCREAM"
 ```
 
-> [!note] Some functions in `pkgs.lib` are identical to `builtins`.
+> [!NOTE]
+>
+> Some functions in `pkgs.lib` are identical to `builtins`.
 
 ## Impurities
 
@@ -513,7 +523,9 @@ pkgx.lib.strings.toUpper "scream"
 - _Build inputs_ are files that derivations refer to in order to derive new files. On run, a derivation will only have access to explicitly declared build inputs.
   - Can only be specified explicitly with _file system paths_ and _dedicated functions_.
 
-> [!note] Nix refers to files by their content hash. If the file contents are unknown, reading files during evaluation is unavoidable.
+> [!NOTE]
+>
+> Nix refers to files by their content hash. If the file contents are unknown, reading files during evaluation is unavoidable.
 
 ### Paths
 
@@ -564,9 +576,11 @@ Derivations are core to Nix.
 - Nix runs _derivations_ to produce build results.
 - Build results can be used as input for other _derivations_.
 
-The built-in impure function `derivation` is the primitive to declare a _derivation_. It is ussually wrapped by the Nixpkgs build mechanism `stdenv.mkDerivation`, it hides most of the complexity of build procedures.
+The built-in impure function `derivation` is the primitive to declare a _derivation_. It is usually wrapped by the Nixpkgs build mechanism `stdenv.mkDerivation`, it hides most of the complexity of build procedures.
 
-> [!note] You will probably never encounter `derivation` in practice.
+> [!NOTE]
+>
+> You will probably never encounter `derivation` in practice.
 
 `mkDerivation` denotes something that Nix will build.
 
@@ -579,7 +593,9 @@ in "${pkgs.nix}"
 # "/nix/store/sv2srrjddrp2isghmrla8s6lazbzmikd-nix-2.11.0"
 ```
 
-> [!note] Output may differ, a different hash or different version may be produced.
+> [!NOTE]
+>
+> Output may differ, a different hash or different version may be produced.
 >
 > A _derivation's_ output path is fully determined by its inputs, in this case from a Nixpkgs version.
 >
