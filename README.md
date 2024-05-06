@@ -532,3 +532,26 @@ The evaluated string contains the Nix store path assigned to the file.
 ```
 
 The same occurs for directories: The entire directory and its files is copied to the Nix store, and the evaluated string becomes the Nix store path of the directory.
+
+### Fetchers
+
+Build input files don't need to come from the file system. The Nix language provides function to fetch files over the network.
+
+- `builtins.fetchurl`
+- `builtins.fetchTarball`
+- `builtins.fetchGit`
+- `builtins.fetchClosure`
+
+The functions evaluate to a file system path in the Nix store.
+
+```nix
+builtins.fetchurl "https://github.com/NixOS/nix/archive/7c3ab5751568a0bc63430b33a5169c5e4784a0ff.tar.gz"
+# "/nix/store/7dhgs330clj36384akg86140fqkgh8zf-7c3ab5751568a0bc63430b33a5169c5e4784a0ff.tar.gz"
+```
+
+Some provide conveniences, like auto unpacking archives.
+
+```nix
+builtins.fetchTarball "https://github.com/NixOS/nix/archive/7c3ab5751568a0bc63430b33a5169c5e4784a0ff.tar.gz"
+# "/nix/store/d59llm96vgis5fy231x6m7nrijs0ww36-source"
+```
