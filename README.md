@@ -555,3 +555,38 @@ Some provide conveniences, like auto unpacking archives.
 builtins.fetchTarball "https://github.com/NixOS/nix/archive/7c3ab5751568a0bc63430b33a5169c5e4784a0ff.tar.gz"
 # "/nix/store/d59llm96vgis5fy231x6m7nrijs0ww36-source"
 ```
+
+## Derivations
+
+Derivations are core to Nix.
+- The Nix language is used to describe _derivations_.
+- Nix runs _derivations_ to produce build results.
+- Build results can be used as input for other _derivations_.
+
+The built-in impure function `derivation` is the primitive to declare a _derivation_. It is ussually wrapped by the Nixpkgs build mechanism `stdenv.mkDerivation`, it hides most of the complexity of build procedures.
+
+> [!note]
+> You will probably never encounter `derivation` in practice.
+
+`mkDerivation` denotes something that Nix will build.
+
+The evaluation result of `derivation` (and `mkDerivation`) is an _attribute set_ with a certain structure and special property. It can be used in _string interpolation_ and in that case evaluates to the Nix store path of its built result.
+
+```nix
+let
+  pkgs = import <nixpkgs> {};
+in "${pkgs.nix}"
+# "/nix/store/sv2srrjddrp2isghmrla8s6lazbzmikd-nix-2.11.0"
+```
+
+> [!note]
+> Output may differ, a different hash or different version may be produced.
+>
+> A _derivation's_ output path is fully determined by its inputs, in this case from a Nixpkgs version.
+>
+> This is why _lookup paths_ (`<...>`) are not recommended to ensure predictable outcomes.
+
+String interpolation on derivations is used to refer to their build results as file system paths when declaring new derivations.
+
+This allows constructing arbitrarily complex compositions of derivations with the Nix language.
+
