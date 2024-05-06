@@ -559,14 +559,14 @@ builtins.fetchTarball "https://github.com/NixOS/nix/archive/7c3ab5751568a0bc6343
 ## Derivations
 
 Derivations are core to Nix.
+
 - The Nix language is used to describe _derivations_.
 - Nix runs _derivations_ to produce build results.
 - Build results can be used as input for other _derivations_.
 
 The built-in impure function `derivation` is the primitive to declare a _derivation_. It is ussually wrapped by the Nixpkgs build mechanism `stdenv.mkDerivation`, it hides most of the complexity of build procedures.
 
-> [!note]
-> You will probably never encounter `derivation` in practice.
+> [!note] You will probably never encounter `derivation` in practice.
 
 `mkDerivation` denotes something that Nix will build.
 
@@ -579,8 +579,7 @@ in "${pkgs.nix}"
 # "/nix/store/sv2srrjddrp2isghmrla8s6lazbzmikd-nix-2.11.0"
 ```
 
-> [!note]
-> Output may differ, a different hash or different version may be produced.
+> [!note] Output may differ, a different hash or different version may be produced.
 >
 > A _derivation's_ output path is fully determined by its inputs, in this case from a Nixpkgs version.
 >
@@ -590,3 +589,74 @@ String interpolation on derivations is used to refer to their build results as f
 
 This allows constructing arbitrarily complex compositions of derivations with the Nix language.
 
+## Working Examples
+
+### Shell Environment
+
+```nix
+# This expression is a function that takes an attribute set as an argument.
+
+# If the argument has the attribute pkgs, it will be used in the function body. Otherwise, by default, import the Nix expression in the file found on the lookup path <nixpkgs> (which is a function in this case), call the function with an empty attribute set, and use the resulting value.
+{ pkgs ? import <nixpkgs> {} }:
+let
+  # The name message is bound to the string value "hello world".
+  message = "hello world";
+in
+# The attribute mkShellNoCC of the pkgs set is a function that is passed an attribute set as argument. Its return value is also the result of the outer function.
+pkgs.mkShellNoCC {
+  # The attribute set passed to mkShellNoCC has the attributes buildInputs (set to a list with one element: the cowsay attribute from pkgs) and shellHook (set to an indented string).
+  buildInputs = with pkgs; [ cowsay ];
+  shellHook = ''
+    # The indented string contains an interpolated expression, which will expand the value of message to yield "hello world".
+    cowsay ${message}
+  '';
+}
+```
+
+### NixOS Configuration
+
+```nix
+# This expression is a function that takes an attribute set as an argument. It returns an attribute set.
+
+# The argument must at least have the attributes config and pkgs, and may have more attributes.
+{ config, pkgs, ... }:
+
+# The returned attribute set contains the attributes imports and environment.
+{
+  # imports is a list with one element: a path to a file next to this Nix file, called hardware-configuration.nix.
+  imports = [ ./hardware-configuration.nix ];
+
+  # environment is itself an attribute set with one attribute systemPackages, which will evaluate to a list with one element: the git attribute from the pkgs set.
+  environment.systemPackages = with pkgs; [ git ];
+
+  # The config argument is not (shown to be) used.
+  # ...
+
+}
+```
+
+### Package
+
+```nix
+# This expression is a function that takes an attribute set which must have exactly the attributes lib, stdenv, and fetchurl.
+{ lib, stdenv, fetchurl }:
+
+# It returns the result of evaluating the function mkDerivation, which is an attribute of stdenv, applied to a recursive set.
+stdenv.mkDerivation rec {
+  # The recursive set passed to mkDerivation uses its own pname and version attributes in the argument to the function fetchurl. fetchurl itself comes from the outer function’s arguments.
+  pname = "hello";
+
+  version = "2.12";
+
+  src = fetchurl {
+    url = "mirror://gnu/${pname}/${pname}-${version}.tar.gz";
+    sha256 = "1ayhp9v4m4rdhjmnl2bq3cibrbqqkgjbl3s7yk2nhlh8vj3ay16g";
+  };
+
+  # The meta attribute is itself an attribute set, where the license attribute has the value that was assigned to the nested attribute lib.licenses.gpl3Plus.
+  meta = with lib; {
+    license = licenses.gpl3Plus;
+  };
+
+}
+```
