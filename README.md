@@ -457,7 +457,7 @@ Libraries considered standard to the Nix language.
 
 ### [`builtins`](https://nix.dev/manual/nix/2.18/language/builtins)
 
-AKA _"primitive operations"_, _"primops"_ 
+AKA _"primitive operations"_, _"primops"_
 
 Functions built into the language, implemented in `C++` available under `builtins`.
 
@@ -468,7 +468,7 @@ builtins.toString
 
 ### `import`
 
-Takes a path to a Nix file, evaluates it and returns the value. If the path points to a directory the `defaults.nix` in the directory is used. 
+Takes a path to a Nix file, evaluates it and returns the value. If the path points to a directory the `defaults.nix` in the directory is used.
 
 ```nix
 # file.nix
@@ -504,7 +504,31 @@ pkgx.lib.strings.toUpper "scream"
 # "SCREAM"
 ```
 
-> [!note]
-> Some functions in `pkgs.lib` are identical to `builtins`.
+> [!note] Some functions in `pkgs.lib` are identical to `builtins`.
 
+## Impurities
 
+- _Pure expressions_: declaring data and transforming it with functions.
+- _Impurities_: reading files from the file system as build inputs.
+- _Build inputs_ are files that derivations refer to in order to derive new files. On run, a derivation will only have access to explicitly declared build inputs.
+  - Can only be specified explicitly with _file system paths_ and _dedicated functions_.
+
+> [!note] Nix refers to files by their content hash. If the file contents are unknown, reading files during evaluation is unavoidable.
+
+### Paths
+
+When a file system path is used in _string interpolation_, the file contents are copied to a special location, the Nix store, as a side effect.
+
+The evaluated string contains the Nix store path assigned to the file.
+
+```
+# ./data
+123
+```
+
+```nix
+"${./data}"
+# "/nix/store/h1qj5h5n05b5dl5q4nldrqq8mdg7dhqk-data"
+```
+
+The same occurs for directories: The entire directory and its files is copied to the Nix store, and the evaluated string becomes the Nix store path of the directory.
